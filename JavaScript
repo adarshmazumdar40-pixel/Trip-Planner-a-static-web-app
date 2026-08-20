@@ -1,0 +1,272 @@
+const form = document.getElementById('plannerForm');
+const formError = document.getElementById('formError');
+const emptyState = document.getElementById('emptyState');
+const loadingState = document.getElementById('loadingState');
+const itineraryWrap = document.getElementById('itineraryWrap');
+const dayTabs = document.getElementById('dayTabs');
+const dayPanels = document.getElementById('dayPanels');
+const tripMeta = document.getElementById('tripMeta');
+
+const venueBank = {
+  Nature: [
+    { type: 'Lakeside sunrise walk', cost: '₹', note: 'easy pace + scenic start' },
+    { type: 'Botanical garden loop', cost: '₹', note: 'green, calm, photo-friendly' },
+    { type: 'Hill viewpoint trek', cost: '₹₹', note: 'moderate effort + wide views' },
+    { type: 'Urban eco-park trail', cost: '₹', note: 'nature break inside the city' },
+    { type: 'Riverside cycling stretch', cost: '₹₹', note: 'light activity + river breeze' },
+    { type: 'Birdwatching hideout stop', cost: '₹', note: 'quiet and mindful slot' },
+    { type: 'Waterfall picnic zone', cost: '₹₹', note: 'short transfer, long chill' },
+    { type: 'Forest canopy boardwalk', cost: '₹₹', note: 'immersive greenery experience' },
+    { type: 'Desert dune sunset point', cost: '₹₹', note: 'golden-hour visual highlight' },
+    { type: 'Coastal cliff lookout', cost: '₹', note: 'dramatic horizon views' },
+    { type: 'National park jeep route', cost: '₹₹₹', note: 'wildlife-focused excursion' },
+    { type: 'Mangrove kayak lane', cost: '₹₹₹', note: 'soft adventure on water' },
+    { type: 'Tea garden stroll', cost: '₹₹', note: 'rolling landscapes + local stories' },
+    { type: 'Valley picnic meadow', cost: '₹', note: 'slow, unplugged afternoon' },
+    { type: 'Rainforest interpretation center', cost: '₹₹', note: 'nature + learning combo' }
+  ],
+  Food: [
+    { type: 'Iconic breakfast street', cost: '₹', note: 'local classics from early vendors' },
+    { type: 'Regional thali house', cost: '₹₹', note: 'multi-dish cultural tasting' },
+    { type: 'Chef-led tasting menu', cost: '₹₹₹', note: 'premium curated flavors' },
+    { type: 'Night market snack lane', cost: '₹', note: 'bite-hop energy and variety' },
+    { type: 'Rooftop fusion bistro', cost: '₹₹₹', note: 'city views + modern plates' },
+    { type: 'Hidden café trail', cost: '₹₹', note: 'aesthetic spots + coffee flights' },
+    { type: 'Spice bazaar tasting stop', cost: '₹', note: 'aromatic local staples' },
+    { type: 'Artisanal dessert studio', cost: '₹₹', note: 'signature sweets + plating' },
+    { type: 'Family-run heritage eatery', cost: '₹₹', note: 'story-rich recipes' },
+    { type: 'Seafood grill shack', cost: '₹₹₹', note: 'fresh catch, casual vibe' },
+    { type: 'Vegan farm-to-table kitchen', cost: '₹₹', note: 'seasonal and sustainable picks' },
+    { type: 'Food truck cluster', cost: '₹', note: 'quick, social, affordable tasting' },
+    { type: 'Old-city chai + bakery stop', cost: '₹', note: 'comfort food break' },
+    { type: 'Cooking workshop kitchen', cost: '₹₹', note: 'hands-on local recipe session' },
+    { type: 'Late-night dessert crawl', cost: '₹₹', note: 'sweet-heavy evening plan' }
+  ],
+  Culture: [
+    { type: 'Heritage fort complex', cost: '₹₹', note: 'history-rich architecture walk' },
+    { type: 'Craft museum wing', cost: '₹', note: 'regional art and artifacts' },
+    { type: 'Old town guided lane', cost: '₹₹', note: 'stories, landmarks, hidden alleys' },
+    { type: 'Classical performance hall', cost: '₹₹₹', note: 'music or dance showcase' },
+    { type: 'Gallery district crawl', cost: '₹₹', note: 'contemporary + local artists' },
+    { type: 'Temple architecture trail', cost: '₹', note: 'sacred spaces and design details' },
+    { type: 'Cultural center workshop', cost: '₹₹', note: 'interactive folklore segment' },
+    { type: 'Historic palace interior', cost: '₹₹₹', note: 'royal-era atmosphere' },
+    { type: 'Street mural quarter', cost: '₹', note: 'visual storytelling walk' },
+    { type: 'Handloom studio visit', cost: '₹₹', note: 'craft process + tradition insight' },
+    { type: 'Archaeology site circuit', cost: '₹₹', note: 'ancient remains and context' },
+    { type: 'City history archive room', cost: '₹', note: 'focused local timelines' },
+    { type: 'Cultural food + story evening', cost: '₹₹', note: 'narrative-led tasting session' },
+    { type: 'Public amphitheatre event', cost: '₹', note: 'live community performance' },
+    { type: 'Traditional market walkthrough', cost: '₹₹', note: 'heritage trade pulse' }
+  ],
+  Nightlife: [
+    { type: 'Live music lounge', cost: '₹₹₹', note: 'acoustic to upbeat sets' },
+    { type: 'Open-air cinema deck', cost: '₹₹', note: 'casual night under the sky' },
+    { type: 'Rooftop mocktail bar', cost: '₹₹', note: 'city lights + relaxed social vibe' },
+    { type: 'DJ club zone', cost: '₹₹₹', note: 'high-energy dance floor' },
+    { type: 'Late-night food arcade', cost: '₹₹', note: 'social and flavor-packed' },
+    { type: 'Game bar and board night', cost: '₹₹', note: 'light, playful evening plan' },
+    { type: 'Comedy cellar set', cost: '₹₹', note: 'short-form stand-up lineup' },
+    { type: 'Jazz basement bar', cost: '₹₹₹', note: 'moody live session' },
+    { type: 'Moonlit beach walk strip', cost: '₹', note: 'quiet but atmospheric' },
+    { type: 'Night photowalk route', cost: '₹', note: 'creative city perspective' },
+    { type: 'Craft beverage taproom', cost: '₹₹', note: 'small-batch tasting flight' },
+    { type: 'Night flea market block', cost: '₹₹', note: 'music + browsing mix' },
+    { type: 'Speakeasy-style lounge', cost: '₹₹₹', note: 'intimate, upscale mood' },
+    { type: 'Cultural night parade zone', cost: '₹₹', note: 'festive and local crowd vibe' },
+    { type: 'Boardwalk neon promenade', cost: '₹', note: 'easy social walk' }
+  ],
+  Shopping: [
+    { type: 'Local craft bazaar', cost: '₹', note: 'handmade souvenirs and bargaining' },
+    { type: 'Designer concept store lane', cost: '₹₹₹', note: 'premium curated labels' },
+    { type: 'Vintage market corner', cost: '₹₹', note: 'retro finds and accessories' },
+    { type: 'Street fashion strip', cost: '₹', note: 'trendy picks on a budget' },
+    { type: 'Artisan textile house', cost: '₹₹', note: 'regional fabrics and patterns' },
+    { type: 'Book + music collectible shop', cost: '₹₹', note: 'niche collectible hunt' },
+    { type: 'Night souvenir lane', cost: '₹', note: 'quick keepsake run' },
+    { type: 'Boutique jewellery gallery', cost: '₹₹₹', note: 'statement pieces and craftsmanship' },
+    { type: 'Spice and tea retail court', cost: '₹', note: 'packable local flavors' },
+    { type: 'Luxury mall experience floor', cost: '₹₹₹', note: 'global and premium mix' },
+    { type: 'Eco-friendly product market', cost: '₹₹', note: 'sustainable shopping picks' },
+    { type: 'Home décor warehouse district', cost: '₹₹', note: 'design-centric browsing' },
+    { type: 'Pop-up creator market', cost: '₹₹', note: 'limited-run local brands' },
+    { type: 'Traditional attire arcade', cost: '₹₹', note: 'culture-forward fashion stop' },
+    { type: 'Outlet complex run', cost: '₹₹', note: 'deal-focused shopping burst' }
+  ]
+};
+
+const fallbackInterests = ['Culture', 'Food', 'Nature'];
+const slotLabels = ['Morning', 'Afternoon', 'Evening'];
+const vibeProfiles = {
+  Relaxed: {
+    offsetBySlot: [0, 2, 4],
+    twist: ['Slow-paced start', 'Leisure-first flow', 'Wind-down friendly']
+  },
+  Balanced: {
+    offsetBySlot: [1, 3, 0],
+    twist: ['Mix of exploration and downtime', 'Variety-packed rhythm', 'Good energy balance']
+  },
+  Packed: {
+    offsetBySlot: [2, 4, 1],
+    twist: ['High-energy sequencing', 'More activity density', 'Maximize city coverage']
+  }
+};
+
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  formError.textContent = '';
+
+  const destination = document.getElementById('destination').value.trim();
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const vibe = document.getElementById('tripVibe').value;
+  const selectedInterests = [...document.querySelectorAll('input[name="interests"]:checked')].map((tag) => tag.value);
+
+  const validationError = validateInputs({ destination, startDate, endDate, vibe, selectedInterests });
+
+  if (validationError) {
+    formError.textContent = validationError;
+    return;
+  }
+
+  const totalDays = getTotalDays(startDate, endDate);
+  const activeInterests = selectedInterests.length ? selectedInterests : fallbackInterests;
+
+  emptyState.classList.add('hidden');
+  itineraryWrap.classList.add('hidden');
+  loadingState.classList.remove('hidden');
+
+  setTimeout(() => {
+    const itinerary = buildItinerary({ destination, startDate, totalDays, vibe, interests: activeInterests });
+    renderItinerary(itinerary, { destination, startDate, endDate, vibe, interests: activeInterests });
+    loadingState.classList.add('hidden');
+    itineraryWrap.classList.remove('hidden');
+  }, 550);
+});
+
+function validateInputs({ destination, startDate, endDate, vibe, selectedInterests }) {
+  if (!destination || !startDate || !endDate || !vibe) {
+    return 'Please fill destination, date range, and vibe.';
+  }
+
+  if (new Date(endDate) < new Date(startDate)) {
+    return 'End date must be on or after start date.';
+  }
+
+  if (getTotalDays(startDate, endDate) > 14) {
+    return 'For demo clarity, keep trips to 14 days or less.';
+  }
+
+  if (selectedInterests.length === 0) {
+    return 'Pick at least one interest tag to personalize the plan.';
+  }
+
+  return '';
+}
+
+function getTotalDays(startDate, endDate) {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffTime = end.getTime() - start.getTime();
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function buildItinerary({ destination, startDate, totalDays, vibe, interests }) {
+  const profile = vibeProfiles[vibe] || vibeProfiles.Balanced;
+
+  return Array.from({ length: totalDays }, (_, dayIndex) => {
+    const dateObj = new Date(startDate);
+    dateObj.setDate(dateObj.getDate() + dayIndex);
+
+    const slots = slotLabels.map((slot, slotIndex) => {
+      const interest = interests[(dayIndex + slotIndex) % interests.length];
+      const pool = venueBank[interest] || venueBank.Culture;
+      const pickIndex = (dayIndex * 3 + profile.offsetBySlot[slotIndex]) % pool.length;
+      const pickedVenue = pool[pickIndex];
+
+      return {
+        slot,
+        interest,
+        venueType: pickedVenue.type,
+        costBand: pickedVenue.cost,
+        note: `${pickedVenue.note} • ${profile.twist[slotIndex % profile.twist.length]}`
+      };
+    });
+
+    return {
+      dayLabel: `Day ${dayIndex + 1}`,
+      dateLabel: dateObj.toLocaleDateString('en-IN', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short'
+      }),
+      destination,
+      slots
+    };
+  });
+}
+
+function renderItinerary(days, meta) {
+  dayTabs.innerHTML = '';
+  dayPanels.innerHTML = '';
+
+  tripMeta.textContent = `${meta.destination} • ${meta.vibe} vibe • ${days.length} day${days.length > 1 ? 's' : ''}`;
+
+  days.forEach((day, index) => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = `day-tab ${index === 0 ? 'active' : ''}`;
+    tab.textContent = `${day.dayLabel}`;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+    tab.setAttribute('aria-controls', `panel-${index}`);
+    tab.id = `tab-${index}`;
+
+    const panel = document.createElement('article');
+    panel.className = 'day-panel';
+    panel.id = `panel-${index}`;
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', `tab-${index}`);
+    panel.hidden = index !== 0;
+
+    panel.innerHTML = `
+      <h3>${day.dayLabel} · ${day.dateLabel}</h3>
+      <div class="slots">
+        ${day.slots
+          .map(
+            (slot) => `
+              <section class="slot">
+                <div class="slot-head">
+                  <h4>${slot.slot} · ${slot.interest}</h4>
+                  <span class="cost">${slot.costBand}</span>
+                </div>
+                <p><strong>${slot.venueType}</strong></p>
+                <p>${slot.note}</p>
+              </section>
+            `
+          )
+          .join('')}
+      </div>
+    `;
+
+    tab.addEventListener('click', () => activateDay(index));
+
+    dayTabs.appendChild(tab);
+    dayPanels.appendChild(panel);
+  });
+}
+
+function activateDay(activeIndex) {
+  const tabs = [...dayTabs.querySelectorAll('.day-tab')];
+  const panels = [...dayPanels.querySelectorAll('.day-panel')];
+
+  tabs.forEach((tab, index) => {
+    const isActive = index === activeIndex;
+    tab.classList.toggle('active', isActive);
+    tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+  });
+
+  panels.forEach((panel, index) => {
+    panel.hidden = index !== activeIndex;
+  });
+}
