@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip Planner | Vibe Itinerary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Vibe-coded portfolio prototype</p>
+      <h1>Trip Planner</h1>
+      <p class="subtitle">Build a day-wise itinerary in seconds with a local AI-style rules engine.</p>
+    </header>
+
+    <section class="planner card">
+      <form id="plannerForm" class="planner-form" novalidate>
+        <div class="field-grid">
+          <label>
+            Destination
+            <input type="text" id="destination" name="destination" placeholder="e.g., Jaipur" required />
+          </label>
+          <label>
+            Start Date
+            <input type="date" id="startDate" name="startDate" required />
+          </label>
+          <label>
+            End Date
+            <input type="date" id="endDate" name="endDate" required />
+          </label>
+          <label>
+            Trip Vibe
+            <select id="tripVibe" name="tripVibe" required>
+              <option value="">Choose vibe</option>
+              <option value="Relaxed">Relaxed</option>
+              <option value="Balanced">Balanced</option>
+              <option value="Packed">Packed</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset class="tags-block">
+          <legend>Interest Tags (pick at least 1)</legend>
+          <div class="tags-grid" id="interestTags">
+            <label class="chip"><input type="checkbox" name="interests" value="Nature" />Nature</label>
+            <label class="chip"><input type="checkbox" name="interests" value="Food" />Food</label>
+            <label class="chip"><input type="checkbox" name="interests" value="Culture" />Culture</label>
+            <label class="chip"><input type="checkbox" name="interests" value="Nightlife" />Nightlife</label>
+            <label class="chip"><input type="checkbox" name="interests" value="Shopping" />Shopping</label>
+          </div>
+        </fieldset>
+
+        <p id="formError" class="form-error" role="alert" aria-live="polite"></p>
+
+        <button type="submit" class="btn-primary">Generate My Itinerary</button>
+      </form>
+    </section>
+
+    <section class="results card">
+      <div class="results-head">
+        <h2>Your Itinerary</h2>
+        <p id="tripMeta" class="trip-meta"></p>
+      </div>
+
+      <div id="emptyState" class="state state-empty">
+        <h3>Ready when you are ✨</h3>
+        <p>Enter trip details to generate an AI-style itinerary with morning, afternoon, and evening plans.</p>
+      </div>
+
+      <div id="loadingState" class="state state-loading hidden">
+        <div class="pulse-dot"></div>
+        <p>Building your day-by-day vibe plan...</p>
+      </div>
+
+      <div id="itineraryWrap" class="itinerary-wrap hidden" aria-live="polite">
+        <div id="dayTabs" class="day-tabs" role="tablist" aria-label="Trip days"></div>
+        <div id="dayPanels" class="day-panels"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
